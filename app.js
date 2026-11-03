@@ -203,6 +203,7 @@
     powerpoint: 'PowerPoint.png',
     onenote: 'OneNote.png',
     smartaviation: 'Smart Aviation.png',
+    chromeremotedesktop: 'Chrome Remote Desktop.png',
     hl8006: 'HL8006 Logo.png'
   };
 
@@ -311,6 +312,7 @@
   const appDockBtn = document.getElementById('appDockBtn');
   const addAppsBtn = document.getElementById('appDockBtn'); // Alias
   const geminiBtn = document.getElementById('geminiBtn');
+  const crdBtn = document.getElementById('crdBtn');
 
   // Nova Launcher Layout Elements
   const novaDayPill = document.getElementById('novaDayPill');
@@ -604,11 +606,30 @@
     searchSuggestionsDropdown.classList.add('open');
   }
 
+  function isUrl(input) {
+    const trimmed = (input || '').trim();
+    if (!trimmed) return false;
+    // Explicit scheme
+    if (/^https?:\/\//i.test(trimmed)) return true;
+    // Spaces within query mean it's a search term, not a direct URL
+    if (/\s/.test(trimmed)) return false;
+    // Matches common TLDs or explicit domain patterns (.com, .org, .net, .edu, .gov, .io, .co, etc.)
+    // or standard domain/path structures: e.g. domain.com, sub.domain.org/path
+    const domainPattern = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.(com|org|net|edu|gov|io|co|au|uk|de|jp|kr|ca|info|biz|me|app|dev|xyz|site|online|top)(\/.*)?$/i;
+    return domainPattern.test(trimmed);
+  }
+
   function executeSearch(query) {
     const q = (query || '').trim();
     if (!q) return;
 
-    // No animation: navigate straight to the results in this tab
+    if (isUrl(q)) {
+      const destinationUrl = /^https?:\/\//i.test(q) ? q : `https://${q}`;
+      window.location.href = destinationUrl;
+      return;
+    }
+
+    // No animation: navigate straight to the Google search results in this tab
     window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
   }
 
@@ -1622,6 +1643,15 @@
       const href = geminiBtn.getAttribute('href') || 'https://gemini.google.com';
       e.preventDefault();
       launchAppWithZoom(geminiBtn, { name: 'Google Gemini', url: href, iconKey: 'gemini' });
+    });
+  }
+
+  // Chrome Remote Desktop Quick Launch button (opens in current tab with full-screen zoom animation)
+  if (crdBtn) {
+    crdBtn.addEventListener('click', (e) => {
+      const href = crdBtn.getAttribute('href') || 'https://remotedesktop.google.com/access/';
+      e.preventDefault();
+      launchAppWithZoom(crdBtn, { name: 'Chrome Remote Desktop', url: href, iconKey: 'chromeremotedesktop' });
     });
   }
 
